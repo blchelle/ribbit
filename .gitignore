@@ -1,0 +1,8 @@
+# Ignores compiled outputs
+dist
+
+# Ignores Node Modules
+node_modules
+
+# Hides .env
+.env
