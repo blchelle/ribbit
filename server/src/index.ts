@@ -2,11 +2,12 @@
 import 'reflect-metadata';
 
 import express from 'express';
+import morgan from 'morgan';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { PrismaClient } from '@prisma/client';
 
-import { HelloResolver } from './resolvers/hello';
+import { resolvers } from '@generated/type-graphql';
 import { __PORT__, __PROD__ } from './constants';
 
 const prisma = new PrismaClient({
@@ -16,16 +17,19 @@ const prisma = new PrismaClient({
 let main = async () => {
 	const app = express();
 
+	if (!__PROD__) app.use(morgan('dev'));
+
 	const apolloServer = new ApolloServer({
 		schema: await buildSchema({
-			resolvers: [HelloResolver],
+			resolvers,
 			validate: false,
 		}),
+		context: () => ({ prisma }),
+		playground: !__PROD__,
 	});
 
 	apolloServer.applyMiddleware({ app });
 
-	app.get('/', (_, res) => res.send('hello'));
 	app.listen(__PORT__, () => console.log(`Listening on port ${__PORT__}`));
 };
 
