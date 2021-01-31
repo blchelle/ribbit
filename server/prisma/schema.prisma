@@ -20,3 +20,12 @@ model Post {
   @@map("post")
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  username  String   @unique
+  password  String
+
+  @@map("usr")
+}
