@@ -5,8 +5,10 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "ts-node-dev ./src/index.ts",
-		"update-db-schema": "psql ribbit -f ./schema/schema.sql",
+		"psql-drop-tables": "psql ribbit -f ./sql/drops.sql",
+		"psql-update-schema": "psql ribbit -f ./sql/schema.sql",
 		"pg": "prisma generate",
+		"pi": "prisma introspect",
 		"tsc": "tsc"
 	},
 	"author": "",
@@ -15,6 +17,7 @@
 		"@prisma/client": "~2.15.0",
 		"@types/graphql-fields": "^1.3.3",
 		"apollo-server-express": "^2.19.2",
+		"argon2": "^0.27.1",
 		"class-validator": "^0.13.1",
 		"dotenv": "^8.2.0",
 		"express": "^4.17.1",
