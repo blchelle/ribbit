@@ -7,30 +7,41 @@ import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { PrismaClient } from '@prisma/client';
 
-import { resolvers } from '@generated/type-graphql';
+import { PostResolver } from './resolvers/post.resolver';
+import { UserResolver } from './resolvers/user.resolver';
 import { __PORT__, __PROD__ } from './constants';
+
+export interface Context {
+	prisma: PrismaClient;
+}
 
 const prisma = new PrismaClient({
 	log: __PROD__ ? ['query', 'error', 'info', 'warn'] : [],
 });
 
 let main = async () => {
-	const app = express();
+	try {
+		const app = express();
 
-	if (!__PROD__) app.use(morgan('dev'));
+		if (!__PROD__) app.use(morgan('dev'));
 
-	const apolloServer = new ApolloServer({
-		schema: await buildSchema({
-			resolvers,
-			validate: false,
-		}),
-		context: () => ({ prisma }),
-		playground: !__PROD__,
-	});
+		const apolloServer = new ApolloServer({
+			schema: await buildSchema({
+				resolvers: [UserResolver, PostResolver],
+				validate: false,
+			}),
+			context: (): Context => ({ prisma }),
+			playground: !__PROD__,
+		});
 
-	apolloServer.applyMiddleware({ app });
+		apolloServer.applyMiddleware({ app });
 
-	app.listen(__PORT__, () => console.log(`Listening on port ${__PORT__}`));
+		app.listen(__PORT__, () =>
+			console.log(`GraphQL API on port ${__PORT__}`),
+		);
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 main()
