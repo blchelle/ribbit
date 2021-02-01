@@ -9,7 +9,7 @@ export class PostResolver {
 	 * @param prisma The prisma client
 	 */
 	@Query(() => [Post])
-	posts(@Ctx() { prisma }: Context) {
+	async posts(@Ctx() { prisma }: Context) {
 		return prisma.post.findMany({ where: {} });
 	}
 
@@ -19,9 +19,9 @@ export class PostResolver {
 	 * @param prisma The prisma client
 	 */
 	@Query(() => Post, { nullable: true })
-	post(@Arg('id') id: number, @Ctx() { prisma }: Context) {
+	async post(@Arg('id') id: number, @Ctx() { prisma }: Context) {
 		try {
-			const post = prisma.post.findFirst({ where: { id } });
+			const post = await prisma.post.findFirst({ where: { id } });
 			return post;
 		} catch (err) {
 			return null;
