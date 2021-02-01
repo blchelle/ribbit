@@ -7,8 +7,6 @@
 		"dev": "ts-node-dev ./src/index.ts",
 		"psql-drop-tables": "psql ribbit -f ./sql/drops.sql",
 		"psql-update-schema": "psql ribbit -f ./sql/schema.sql",
-		"pg": "prisma generate",
-		"pi": "prisma introspect",
 		"tsc": "tsc"
 	},
 	"author": "",
