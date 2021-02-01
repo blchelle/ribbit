@@ -16,7 +16,7 @@ export interface Context {
 }
 
 const prisma = new PrismaClient({
-	log: __PROD__ ? ['query', 'error', 'info', 'warn'] : [],
+	log: __PROD__ ? [] : ['query', 'error', 'info', 'warn'],
 });
 
 let main = async () => {
