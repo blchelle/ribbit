@@ -1,4 +1,4 @@
-# Ribbit
+# Ribbit 🐸
 
 Ribbit is a full-stack reddit clone built using a modern tech stack
 
@@ -6,7 +6,7 @@ Ribbit is a full-stack reddit clone built using a modern tech stack
 
 Both the Front and Back End use [TypeScript](https://www.typescriptlang.org/)
 
-Front End 🐸
+Front End
 
 -   [NextJS](https://nextjs.org/)
 -   [React](https://reactjs.org/)
