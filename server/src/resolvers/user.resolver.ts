@@ -18,7 +18,6 @@ import {
 	validatePasswordMatch,
 	validatePasswordStrength,
 	validateUserDoesNotExist,
-	validateUserExists,
 } from '../validators/user.validators';
 
 @InputType()
@@ -99,17 +98,25 @@ export class UserResolver {
 		// Pulls the username and password off of the options
 		const { username, password } = options;
 
-		// Checks if the user exists,
-		// If so then the user will be an object an errors will be []
-		// Otherwise, user will be null and error will be non-empty
-		let { errors, user } = await validateUserExists(username, prisma);
+		// Attempts to find a user with the passed in username
+		const user = await prisma.user.findUnique({
+			where: { username },
+		});
 
-		if ((errors && errors.length > 0) || !user) {
-			return { errors };
+		// Sends an error if the username wasn't found
+		if (!user) {
+			return {
+				errors: [
+					{
+						field: 'username',
+						message: `Could not find a user with the username ${username}`,
+					},
+				],
+			};
 		}
 
-		// Checks that the password matches, otherwise adds errors
-		errors = [...(await validatePasswordMatch(user.password, password))];
+		// Checks that the password matches
+		const errors = await validatePasswordMatch(user.password, password);
 
 		if (errors.length > 0) {
 			return { errors };

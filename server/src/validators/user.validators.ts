@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 
 import { __PROD__ } from '../constants';
 import { FieldError } from '../models/error.model';
-import { UserResponse } from '../resolvers/user.resolver';
 
 /**
  * Checks to database to make sure that a username is not already taken,
@@ -59,37 +58,6 @@ export const validatePasswordStrength = (
 	}
 
 	return errors;
-};
-
-/**
- * Checks to database to make sure that a username is assigned to a user,
- * this is typically run on a login request
- * @param username The username to search for
- * @param prisma The prisma client
- * @param errors Any preexisting errors
- *
- * @returns Errors after the validation or the found user
- */
-export const validateUserExists = async (
-	username: string,
-	prisma: PrismaClient,
-	errors: FieldError[] = [],
-): Promise<UserResponse> => {
-	// Attempts to find a user with the passed in username
-	const user = await prisma.user.findUnique({
-		where: { username },
-	});
-
-	if (user) {
-		return { user, errors };
-	} else {
-		errors.push({
-			field: 'username',
-			message: `Could not find a user with the username ${username}`,
-		});
-	}
-
-	return { errors };
 };
 
 /**
