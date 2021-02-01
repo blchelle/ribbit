@@ -1,7 +1,7 @@
 // This must be the first import for TypeGraphQL to work
 import 'reflect-metadata';
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import session from 'express-session';
 import morgan from 'morgan';
 import { ApolloServer } from 'apollo-server-express';
@@ -16,6 +16,8 @@ import { __PORT__, __PROD__, __REDIS_SECRET__ } from './constants';
 
 export interface Context {
 	prisma: PrismaClient;
+	req: Request;
+	res: Response;
 }
 
 const prisma = new PrismaClient({
@@ -40,7 +42,17 @@ const main = async () => {
 		app.use(
 			session({
 				name: 'qid',
-				store: new RedisStore({ client: redisClient }),
+				store: new RedisStore({
+					client: redisClient,
+					disableTouch: true,
+				}),
+				cookie: {
+					maxAge: 1000 * 60 * 60 * 24 * 365, // 1 Year
+					httpOnly: true,
+					secure: __PROD__,
+					sameSite: 'lax',
+				},
+				saveUninitialized: false,
 				secret: __REDIS_SECRET__,
 				resave: false,
 			}),
@@ -52,7 +64,7 @@ const main = async () => {
 				resolvers: [UserResolver, PostResolver],
 				validate: false,
 			}),
-			context: (): Context => ({ prisma }),
+			context: ({ req, res }): Context => ({ prisma, req, res }),
 			playground: !__PROD__,
 		});
 

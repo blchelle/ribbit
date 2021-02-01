@@ -47,6 +47,25 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
 	/**
+	 * Attempts to get the requesters information if they are logged in
+	 * @param context The context
+	 */
+	@Query(() => User, { nullable: true })
+	async me(@Ctx() { prisma, req }: Context): Promise<User | null> {
+		// Checks if the user is logged in
+		if (!req.session.userId) {
+			return null;
+		}
+
+		// Gets the users information
+		const user = await prisma.user.findUnique({
+			where: { id: req.session.userId },
+		});
+
+		return user;
+	}
+
+	/**
 	 * Attempts to find a user in the db with a given id
 	 * @param id The id being queried
 	 * @param prisma The prisma client
@@ -59,12 +78,12 @@ export class UserResolver {
 	/**
 	 * Attempts to log a user in with given credentials
 	 * @param options The username and password credentials
-	 * @param prisma The prisma client
+	 * @param prisma The context
 	 */
 	@Query(() => UserResponse)
 	async login(
 		@Arg('options') options: UsernamePasswordInput,
-		@Ctx() { prisma }: Context,
+		@Ctx() { prisma, req }: Context,
 	): Promise<UserResponse> {
 		// Pulls the username and password off of the options
 		const { username, password } = options;
@@ -93,6 +112,9 @@ export class UserResolver {
 			return { errors };
 		}
 
+		// Puts the user id on a session cookie
+		req.session.userId = user.id;
+
 		// If the code reaches here, the user exists and the password matches
 		// Sends the user their information
 		return { user };
@@ -101,12 +123,12 @@ export class UserResolver {
 	/**
 	 * Attempts to register a user account given a username and password
 	 * @param options The username and password
-	 * @param prisma The prisma client
+	 * @param context The context
 	 */
 	@Mutation(() => UserResponse)
 	async register(
 		@Arg('options') options: UsernamePasswordInput,
-		@Ctx() { prisma }: Context,
+		@Ctx() { prisma, req }: Context,
 	): Promise<UserResponse> {
 		// Pulls the username and password off of the options
 		const { username, password } = options;
@@ -129,6 +151,9 @@ export class UserResolver {
 		const user = await prisma.user.create({
 			data: { username, password: hashedPassword },
 		});
+
+		// Puts the user id on a session cookie
+		req.session.userId = user.id;
 
 		return { user };
 	}
