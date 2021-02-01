@@ -14,6 +14,21 @@ export class PostResolver {
 	}
 
 	/**
+	 * Executes a GraphQL query, finds a post with a specified id
+	 * @param id The id of the post being queried
+	 * @param prisma The prisma client
+	 */
+	@Query(() => Post, { nullable: true })
+	post(@Arg('id') id: number, @Ctx() { prisma }: Context) {
+		try {
+			const post = prisma.post.findFirst({ where: { id } });
+			return post;
+		} catch (err) {
+			return null;
+		}
+	}
+
+	/**
 	 * Executes a GraphQL mutation query, attempting to insert a post into the db
 	 * @param title The title of the post we are creating
 	 * @param prisma The prisma client
