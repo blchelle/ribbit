@@ -1,7 +1,7 @@
 {
 	"name": "server",
 	"version": "1.0.0",
-	"description": "",
+	"description": " A full-stack reddit clone server",
 	"main": "index.js",
 	"scripts": {
 		"dev": "ts-node-dev ./src/index.ts",
@@ -9,7 +9,7 @@
 		"psql-update-schema": "psql ribbit -f ./sql/schema.sql",
 		"tsc": "tsc"
 	},
-	"author": "",
+	"author": "Brock Chelle",
 	"license": "ISC",
 	"dependencies": {
 		"@prisma/client": "~2.15.0",
