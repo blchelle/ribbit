@@ -12,7 +12,7 @@ export class User {
 	updatedAt = new Date();
 
 	@Field()
-	username!: String;
+	username!: string;
 
-	password!: String;
+	password!: string;
 }
