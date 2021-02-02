@@ -6,3 +6,6 @@ node_modules
 
 # Hides .env
 .env
+
+# Redis Stuff
+*.rdb
