@@ -1,8 +1,8 @@
-<div style="width: 100%; display: flex; justify-content: center;">
-	<img src="https://user-images.githubusercontent.com/39068407/106548025-83f5e100-64cb-11eb-818f-c400743456ff.png" />
-</div>
-# Ribbit
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/39068407/106548025-83f5e100-64cb-11eb-818f-c400743456ff.png" />
+</p>
 
+## Welcome to the Ribbit Repository
 Ribbit is a full-stack reddit clone built around GraphQL, Typescript, and other modern technologies for full-stack type safety.
 
 ## Technology Stack 💻
