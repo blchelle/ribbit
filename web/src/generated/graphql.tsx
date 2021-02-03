@@ -99,6 +99,16 @@ export type UsernamePasswordInput = {
   password: Scalars['String'];
 };
 
+export type CommonErrorFragment = (
+  { __typename?: 'FieldError' }
+  & Pick<FieldError, 'field' | 'message'>
+);
+
+export type CommonUserFragment = (
+  { __typename?: 'User' }
+  & Pick<User, 'id' | 'username'>
+);
+
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
   password: Scalars['String'];
@@ -111,10 +121,10 @@ export type LoginMutation = (
     { __typename?: 'UserResponse' }
     & { user?: Maybe<(
       { __typename?: 'User' }
-      & Pick<User, 'id' | 'username'>
+      & CommonUserFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
-      & Pick<FieldError, 'field' | 'message'>
+      & CommonErrorFragment
     )>> }
   ) }
 );
@@ -131,29 +141,50 @@ export type RegisterMutation = (
     { __typename?: 'UserResponse' }
     & { user?: Maybe<(
       { __typename?: 'User' }
-      & Pick<User, 'id' | 'username'>
+      & CommonUserFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
-      & Pick<FieldError, 'field' | 'message'>
+      & CommonErrorFragment
     )>> }
   ) }
 );
 
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
+
+export type MeQuery = (
+  { __typename?: 'Query' }
+  & { me?: Maybe<(
+    { __typename?: 'User' }
+    & CommonUserFragment
+  )> }
+);
+
+export const CommonErrorFragmentDoc = gql`
+    fragment CommonError on FieldError {
+  field
+  message
+}
+    `;
+export const CommonUserFragmentDoc = gql`
+    fragment CommonUser on User {
+  id
+  username
+}
+    `;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(options: {username: $username, password: $password}) {
     user {
-      id
-      username
+      ...CommonUser
     }
     errors {
-      field
-      message
+      ...CommonError
     }
   }
 }
-    `;
+    ${CommonUserFragmentDoc}
+${CommonErrorFragmentDoc}`;
 export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
@@ -184,16 +215,15 @@ export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!) {
   register(options: {username: $username, password: $password}) {
     user {
-      id
-      username
+      ...CommonUser
     }
     errors {
-      field
-      message
+      ...CommonError
     }
   }
 }
-    `;
+    ${CommonUserFragmentDoc}
+${CommonErrorFragmentDoc}`;
 export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
 
 /**
@@ -220,3 +250,35 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const MeDocument = gql`
+    query Me {
+  me {
+    ...CommonUser
+  }
+}
+    ${CommonUserFragmentDoc}`;
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+      }
+export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+        }
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
