@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { Form, Formik } from 'formik';
 
 import Wrapper from '../components/Wrapper';
@@ -12,6 +13,8 @@ interface RegisterProps {}
 const Register: React.FC<RegisterProps> = ({}) => {
 	const [register, { data }] = useRegisterMutation();
 
+	const router = useRouter();
+
 	return (
 		<Wrapper variant="small">
 			<Formik
@@ -21,6 +24,8 @@ const Register: React.FC<RegisterProps> = ({}) => {
 
 					if (res.data?.register.errors) {
 						setErrors(toErrorMap(res.data.register.errors));
+					} else if (res.data?.register.user) {
+						router.push('/');
 					}
 				}}
 			>
