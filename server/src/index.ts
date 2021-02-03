@@ -13,7 +13,12 @@ import { PrismaClient } from '@prisma/client';
 
 import { PostResolver } from './resolvers/post.resolver';
 import { UserResolver } from './resolvers/user.resolver';
-import { __PORT__, __PROD__, __REDIS_SECRET__ } from './constants';
+import {
+	__COOKIE_NAME__,
+	__PORT__,
+	__PROD__,
+	__REDIS_SECRET__,
+} from './constants';
 
 export interface Context {
 	prisma: PrismaClient;
@@ -50,7 +55,7 @@ const main = async () => {
 		// Applies redis store - session middleware
 		app.use(
 			session({
-				name: 'qid',
+				name: __COOKIE_NAME__,
 				store: new RedisStore({
 					client: redisClient,
 					disableTouch: true,
