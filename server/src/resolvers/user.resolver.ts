@@ -81,7 +81,7 @@ export class UserResolver {
 	 * @param options The username and password credentials
 	 * @param prisma The context
 	 */
-	@Query(() => UserResponse)
+	@Mutation(() => UserResponse)
 	async login(
 		@Arg('options') options: UsernamePasswordInput,
 		@Ctx() { prisma, req }: Context,
