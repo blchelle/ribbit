@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { ChevronDownIcon, SettingsIcon } from '@chakra-ui/icons';
 
-import { useMeQuery } from '../generated/graphql';
+import { useLogoutMutation, useMeQuery } from '../generated/graphql';
 
 interface NavBarProps {}
 
@@ -23,12 +23,25 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 	const { colorMode, toggleColorMode } = useColorMode();
 
 	// GraphQL Hooks
-	const { data, loading } = useMeQuery();
+	const { data, loading: meLoading } = useMeQuery();
+
+	// The logout mutation has to update the cached user to null
+	const [logout, { loading: logoutLoading }] = useLogoutMutation({
+		update(cache) {
+			cache.modify({
+				fields: {
+					me() {
+						return null;
+					},
+				},
+			});
+		},
+	});
 
 	let body = null;
 
 	// Data is loading
-	if (loading) {
+	if (meLoading) {
 	}
 	// User is not logged in
 	else if (!data.me) {
@@ -68,9 +81,16 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 	// User is logged in
 	else {
 		body = (
-			<Flex>
-				<Box mr={4}>{data.me.username}</Box>
-				<Button variant="link">Logout</Button>
+			<Flex alignItems="center">
+				<Box mr={8}>{data.me.username}</Box>
+				<Button
+					variant="outline"
+					colorScheme="secondary"
+					onClick={() => logout()}
+					isLoading={logoutLoading}
+				>
+					Logout
+				</Button>
 			</Flex>
 		);
 	}
