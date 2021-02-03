@@ -4,6 +4,7 @@ import 'reflect-metadata';
 import express, { Request, Response } from 'express';
 import session from 'express-session';
 import morgan from 'morgan';
+import cors from 'cors';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import redis from 'redis';
@@ -27,6 +28,14 @@ const prisma = new PrismaClient({
 const main = async () => {
 	try {
 		const app = express();
+
+		// Allows CORS for all routes on the client
+		app.use(
+			cors({
+				origin: 'http://localhost:3000',
+				credentials: true,
+			}),
+		);
 
 		if (!__PROD__) app.use(morgan('dev'));
 
@@ -69,7 +78,10 @@ const main = async () => {
 		});
 
 		// Applies the apollos server middleware
-		apolloServer.applyMiddleware({ app });
+		apolloServer.applyMiddleware({
+			app,
+			cors: false,
+		});
 
 		// Start the server
 		app.listen(__PORT__, () =>
