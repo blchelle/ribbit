@@ -18,6 +18,7 @@ import {
 	validatePasswordMatch,
 	validatePasswordStrength,
 	validateUserDoesNotExist,
+	validateUsernameNotEmpty,
 } from '../validators/user.validators';
 
 /**
@@ -131,10 +132,15 @@ export class UserResolver {
 		@Ctx() { prisma, req }: Context,
 	): Promise<UserResponse> {
 		// Pulls the username and password off of the options
-		const { username, password } = options;
+		let { username, password } = options;
+
+		// Trim the username and password
+		username = username.trim();
+		password = password.trim();
 
 		// Used to keep track of any errors that occur
 		const errors = [
+			...validateUsernameNotEmpty(username),
 			...(await validateUserDoesNotExist(username, prisma)),
 			...validatePasswordStrength(password),
 		];

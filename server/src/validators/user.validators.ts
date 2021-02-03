@@ -35,6 +35,28 @@ export const validateUserDoesNotExist = async (
 };
 
 /**
+ * Checks that the entered username is non-empty
+ * @param username The username to check
+ * @param errors Any preexisting errors
+ *
+ * @returns Errors after the validation
+ */
+export const validateUsernameNotEmpty = (
+	username: string,
+	errors: FieldError[] = [],
+): FieldError[] => {
+	// Ensures that the username isn't taken
+	if (username.length === 0) {
+		errors.push({
+			field: 'username',
+			message: 'Username cannot be empty',
+		});
+	}
+
+	return errors;
+};
+
+/**
  * Ensures that a password is strong enough, dependent on the environment
  * this is typically run on a sign up request
  * @param password The password to validate
