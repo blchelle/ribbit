@@ -10,7 +10,7 @@ import {
 } from 'type-graphql';
 import argon2 from 'argon2';
 
-import { __PROD__ } from '../constants';
+import { __COOKIE_NAME__, __PROD__ } from '../constants';
 import { Context } from '../index';
 import { User } from '../models/user.model';
 import { FieldError } from '../models/error.model';
@@ -119,6 +119,29 @@ export class UserResolver {
 		// If the code reaches here, the user exists and the password matches
 		// Sends the user their information
 		return { user };
+	}
+
+	/**
+	 * Attempts to logout the user by clearing their session
+	 * @param context The context
+	 *
+	 * @returns True if the session was successfully deleted, false otherwise
+	 */
+	@Mutation(() => Boolean)
+	logout(@Ctx() { req, res }: Context): Promise<Boolean> {
+		return new Promise((resolve) =>
+			// Attempts to destroy the session on the redis server
+			req.session.destroy((err) => {
+				if (err) {
+					resolve(false);
+					return;
+				}
+
+				// Clears the session cookie on the client
+				res.clearCookie(__COOKIE_NAME__);
+				resolve(true);
+			}),
+		);
 	}
 
 	/**
