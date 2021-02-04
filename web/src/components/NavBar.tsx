@@ -12,8 +12,10 @@ import {
 	Text,
 	useColorMode,
 } from '@chakra-ui/react';
-import { ChevronDownIcon, SettingsIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon } from '@chakra-ui/icons';
 
+import RibbitLogoText from './icons/RibbitLogoText';
+import UserIcon from './icons/UserIcon';
 import { useLogoutMutation, useMeQuery } from '../generated/graphql';
 
 interface NavBarProps {}
@@ -44,7 +46,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 	if (meLoading) {
 	}
 	// User is not logged in
-	else if (!data.me) {
+	else if (!data?.me) {
 		body = (
 			<>
 				<NextLink href="/login">
@@ -60,7 +62,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 				<Menu>
 					<MenuButton
 						as={Button}
-						leftIcon={<SettingsIcon />}
+						leftIcon={<UserIcon />}
 						rightIcon={<ChevronDownIcon />}
 					></MenuButton>
 					<MenuList>
@@ -96,7 +98,8 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 	}
 
 	return (
-		<Flex p={4} w="100%">
+		<Flex p={4} w="100%" align="center">
+			<RibbitLogoText />
 			<Box ml={'auto'}>{body}</Box>
 		</Flex>
 	);
