@@ -6,23 +6,21 @@ import {
 	Flex,
 	Menu,
 	MenuButton,
-	MenuDivider,
-	MenuItem,
-	MenuList,
-	Text,
 	useColorMode,
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 
 import RibbitLogoText from './icons/RibbitLogoText';
 import UserIcon from './icons/UserIcon';
+import UserMenuList from './UserMenuList';
 import { useLogoutMutation, useMeQuery } from '../generated/graphql';
 
 interface NavBarProps {}
 
 const NavBar: React.FC<NavBarProps> = ({}) => {
 	// Chakra Hooks
-	const { colorMode, toggleColorMode } = useColorMode();
+	const { colorMode } = useColorMode();
+	const isDarkMode = colorMode === 'dark';
 
 	// GraphQL Hooks
 	const { data, loading: meLoading } = useMeQuery();
@@ -65,17 +63,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 						leftIcon={<UserIcon />}
 						rightIcon={<ChevronDownIcon />}
 					></MenuButton>
-					<MenuList>
-						<MenuItem onClick={toggleColorMode}>
-							Switch to {colorMode === 'light' ? 'dark' : 'light'}{' '}
-							mode
-						</MenuItem>
-						<MenuDivider />
-						<MenuItem>
-							<Text>Log In</Text>
-						</MenuItem>
-						<MenuItem>Sign Up</MenuItem>
-					</MenuList>
+					<UserMenuList />
 				</Menu>
 			</>
 		);
@@ -98,7 +86,14 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 	}
 
 	return (
-		<Flex p={4} w="100%" align="center">
+		<Flex
+			py={2}
+			px={8}
+			w="100%"
+			align="center"
+			bg={isDarkMode ? 'gray.800' : 'gray.100'}
+			borderBottom={`1px solid ${isDarkMode ? '#333' : '#DDD'}`}
+		>
 			<RibbitLogoText />
 			<Box ml={'auto'}>{body}</Box>
 		</Flex>

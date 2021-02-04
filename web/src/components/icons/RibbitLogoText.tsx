@@ -55,8 +55,8 @@ const RibbitLogoText = createIcon({
 	displayName: 'RibbitLogoText',
 	viewBox: '0 0 115 40',
 	defaultProps: {
-		width: 153.75,
-		height: 50,
+		width: '115px',
+		height: '40px',
 	},
 	path: <RibbitLogoTextSVGPath />,
 });
