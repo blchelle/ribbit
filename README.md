@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/39068407/106548025-83f5e100-64cb-11eb-818f-c400743456ff.png" />
+  <img src="https://user-images.githubusercontent.com/39068407/106931592-fb965c80-66d3-11eb-8a99-ba8b34bcd00c.png" />
 </p>
 
 ## Welcome to the Ribbit Repository
+
 Ribbit is a full-stack reddit clone built around GraphQL, Typescript, and other modern technologies for full-stack type safety.
 
 ## Technology Stack 💻
