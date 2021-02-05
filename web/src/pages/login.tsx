@@ -5,13 +5,14 @@ import { Form, Formik } from 'formik';
 
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { useLoginMutation } from '../generated/graphql';
+import { MeDocument, MeQuery, useLoginMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils/toErrorMap';
+import { withApollo } from '../apollo/withApollo';
 
 interface LoginProps {}
 
 const Login: React.FC<LoginProps> = ({}) => {
-	const [login, { data }] = useLoginMutation();
+	const [login] = useLoginMutation();
 
 	const router = useRouter();
 
@@ -20,7 +21,18 @@ const Login: React.FC<LoginProps> = ({}) => {
 			<Formik
 				initialValues={{ username: '', password: '' }}
 				onSubmit={async (values, { setErrors }) => {
-					const res = await login({ variables: values });
+					const res = await login({
+						variables: values,
+						update: (cache, { data }) => {
+							cache.writeQuery<MeQuery>({
+								query: MeDocument,
+								data: {
+									__typename: 'Query',
+									me: data?.login.user,
+								},
+							});
+						},
+					});
 
 					if (res.data?.login.errors) {
 						setErrors(toErrorMap(res.data.login.errors));
@@ -60,4 +72,4 @@ const Login: React.FC<LoginProps> = ({}) => {
 	);
 };
 
-export default Login;
+export default withApollo({ ssr: false })(Login);

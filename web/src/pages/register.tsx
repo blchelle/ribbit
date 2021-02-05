@@ -7,11 +7,12 @@ import InputField from '../components/InputField';
 import { Box, Button } from '@chakra-ui/react';
 import { useRegisterMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils/toErrorMap';
+import { withApollo } from '../apollo/withApollo';
 
 interface RegisterProps {}
 
 const Register: React.FC<RegisterProps> = ({}) => {
-	const [register, { data }] = useRegisterMutation();
+	const [register] = useRegisterMutation();
 
 	const router = useRouter();
 
@@ -60,4 +61,4 @@ const Register: React.FC<RegisterProps> = ({}) => {
 	);
 };
 
-export default Register;
+export default withApollo({ ssr: false })(Register);

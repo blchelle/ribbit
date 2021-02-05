@@ -14,6 +14,7 @@ import RibbitLogoText from './icons/RibbitLogoText';
 import UserIcon from './icons/UserIcon';
 import UserMenuList from './UserMenuList';
 import { useLogoutMutation, useMeQuery } from '../generated/graphql';
+import { isServer } from '../utils/isServer';
 
 interface NavBarProps {}
 
@@ -23,7 +24,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 	const isDarkMode = colorMode === 'dark';
 
 	// GraphQL Hooks
-	const { data, loading: meLoading } = useMeQuery();
+	const { data, loading: meLoading } = useMeQuery({ skip: isServer() });
 
 	// The logout mutation has to update the cached user to null
 	const [logout, { loading: logoutLoading }] = useLogoutMutation({
