@@ -1,43 +1,36 @@
-import React from 'react';
-import NextLink from 'next/link';
+import React, { useState } from 'react';
 import {
 	Box,
 	Button,
 	Flex,
-	Menu,
-	MenuButton,
 	useColorMode,
+	useDisclosure,
 } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
 
 import RibbitLogoText from './icons/RibbitLogoText';
-import UserIcon from './icons/UserIcon';
 import UserMenuList from './UserMenuList';
-import { useLogoutMutation, useMeQuery } from '../generated/graphql';
+import { useMeQuery } from '../generated/graphql';
 import { isServer } from '../utils/isServer';
+import AuthModal, { AuthModalType } from './AuthModal';
 
 interface NavBarProps {}
 
 const NavBar: React.FC<NavBarProps> = ({}) => {
-	// Chakra Hooks
+	// Chakra Color Mode Hook
 	const { colorMode } = useColorMode();
 	const isDarkMode = colorMode === 'dark';
+
+	// Chakra Modal Hook for AuthModal
+	const { isOpen, onOpen, onClose } = useDisclosure();
+	const [authModalType, setAuthModalType] = useState<AuthModalType>('login');
 
 	// GraphQL Hooks
 	const { data, loading: meLoading } = useMeQuery({ skip: isServer() });
 
-	// The logout mutation has to update the cached user to null
-	const [logout, { loading: logoutLoading }] = useLogoutMutation({
-		update(cache) {
-			cache.modify({
-				fields: {
-					me() {
-						return null;
-					},
-				},
-			});
-		},
-	});
+	const openModal = (type: AuthModalType) => {
+		setAuthModalType(type);
+		onOpen();
+	};
 
 	let body = null;
 
@@ -48,42 +41,33 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 	else if (!data?.me) {
 		body = (
 			<>
-				<NextLink href="/login">
-					<Button colorScheme="secondary" variant="outline" mr={4}>
-						Log In
-					</Button>
-				</NextLink>
-				<NextLink href="/register">
-					<Button colorScheme="secondary" mr={4}>
-						Sign Up
-					</Button>
-				</NextLink>
-				<Menu>
-					<MenuButton
-						as={Button}
-						leftIcon={<UserIcon />}
-						rightIcon={<ChevronDownIcon />}
-					></MenuButton>
-					<UserMenuList />
-				</Menu>
+				<Button
+					colorScheme="secondary"
+					variant="outline"
+					mr={4}
+					onClick={() => openModal('login')}
+				>
+					Log In
+				</Button>
+				<Button
+					colorScheme="secondary"
+					mr={4}
+					onClick={() => openModal('sign up')}
+				>
+					Sign Up
+				</Button>
+				<AuthModal
+					isCentered
+					onClose={onClose}
+					isOpen={isOpen}
+					type={authModalType}
+					children={null}
+				/>
 			</>
 		);
 	}
 	// User is logged in
 	else {
-		body = (
-			<Flex alignItems="center">
-				<Box mr={8}>{data.me.username}</Box>
-				<Button
-					variant="outline"
-					colorScheme="secondary"
-					onClick={() => logout()}
-					isLoading={logoutLoading}
-				>
-					Logout
-				</Button>
-			</Flex>
-		);
 	}
 
 	return (
@@ -97,6 +81,10 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 		>
 			<RibbitLogoText />
 			<Box ml={'auto'}>{body}</Box>
+			<UserMenuList
+				openAuthModal={() => openModal('login')}
+				user={data?.me}
+			/>
 		</Flex>
 	);
 };
