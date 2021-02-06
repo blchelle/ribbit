@@ -7,11 +7,9 @@ import theme from '../theme';
 function MyApp({ Component, pageProps }) {
 	return (
 		<ChakraProvider resetCSS theme={theme}>
-			<ColorModeProvider options={{ useSystemColorMode: true }}>
-				<ThemeWrapper>
-					<Component {...pageProps} />
-				</ThemeWrapper>
-			</ColorModeProvider>
+			<ThemeWrapper>
+				<Component {...pageProps} />
+			</ThemeWrapper>
 		</ChakraProvider>
 	);
 }

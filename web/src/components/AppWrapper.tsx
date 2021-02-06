@@ -11,9 +11,6 @@ const AppWrapper = (props) => {
 			direction="column"
 			alignItems="center"
 			justifyContent="flex-start"
-			bg={bgColor[colorMode]}
-			color={color[colorMode]}
-			fill={color[colorMode]}
 			w="100%"
 			minH="100vh"
 			{...props}
