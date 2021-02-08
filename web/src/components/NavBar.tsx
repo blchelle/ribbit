@@ -58,6 +58,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
 				</Button>
 				<AuthModal
 					isCentered
+					setType={setAuthModalType}
 					onClose={onClose}
 					isOpen={isOpen}
 					type={authModalType}
