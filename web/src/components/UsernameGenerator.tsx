@@ -27,7 +27,7 @@ const UsernameGenerator: React.FC<UsernameGeneratorProps> = ({
 	return (
 		<Stack align="flex-start" spacing={0} {...props}>
 			<Flex alignItems="center">
-				<Text mr={2}>Here are some username suggestions</Text>
+				<Text mr={2}>Some username suggestions</Text>
 				<IconButton
 					aria-label="reload-usernames"
 					onClick={reload}
