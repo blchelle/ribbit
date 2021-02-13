@@ -1,4 +1,5 @@
 fragment CommonUser on User {
 	id
+	email
 	username
 }

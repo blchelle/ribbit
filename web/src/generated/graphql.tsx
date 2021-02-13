@@ -44,6 +44,7 @@ export type User = {
   id: Scalars['Float'];
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
+  email: Scalars['String'];
   username: Scalars['String'];
 };
 
@@ -75,12 +76,12 @@ export type MutationDeletePostArgs = {
 
 
 export type MutationLoginArgs = {
-  options: UsernamePasswordInput;
+  options: LoginInput;
 };
 
 
 export type MutationRegisterArgs = {
-  options: UsernamePasswordInput;
+  options: RegisterInput;
 };
 
 export type UserResponse = {
@@ -95,7 +96,13 @@ export type FieldError = {
   message: Scalars['String'];
 };
 
-export type UsernamePasswordInput = {
+export type LoginInput = {
+  credential: Scalars['String'];
+  password: Scalars['String'];
+};
+
+export type RegisterInput = {
+  email: Scalars['String'];
   username: Scalars['String'];
   password: Scalars['String'];
 };
@@ -107,11 +114,11 @@ export type CommonErrorFragment = (
 
 export type CommonUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username'>
+  & Pick<User, 'id' | 'email' | 'username'>
 );
 
 export type LoginMutationVariables = Exact<{
-  username: Scalars['String'];
+  credential: Scalars['String'];
   password: Scalars['String'];
 }>;
 
@@ -139,6 +146,7 @@ export type LogoutMutation = (
 );
 
 export type RegisterMutationVariables = Exact<{
+  email: Scalars['String'];
   username: Scalars['String'];
   password: Scalars['String'];
 }>;
@@ -189,12 +197,13 @@ export const CommonErrorFragmentDoc = gql`
 export const CommonUserFragmentDoc = gql`
     fragment CommonUser on User {
   id
+  email
   username
 }
     `;
 export const LoginDocument = gql`
-    mutation Login($username: String!, $password: String!) {
-  login(options: {username: $username, password: $password}) {
+    mutation Login($credential: String!, $password: String!) {
+  login(options: {credential: $credential, password: $password}) {
     user {
       ...CommonUser
     }
@@ -220,7 +229,7 @@ export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutati
  * @example
  * const [loginMutation, { data, loading, error }] = useLoginMutation({
  *   variables: {
- *      username: // value for 'username'
+ *      credential: // value for 'credential'
  *      password: // value for 'password'
  *   },
  * });
@@ -261,8 +270,8 @@ export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const RegisterDocument = gql`
-    mutation Register($username: String!, $password: String!) {
-  register(options: {username: $username, password: $password}) {
+    mutation Register($email: String!, $username: String!, $password: String!) {
+  register(options: {email: $email, username: $username, password: $password}) {
     user {
       ...CommonUser
     }
@@ -288,6 +297,7 @@ export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, Regis
  * @example
  * const [registerMutation, { data, loading, error }] = useRegisterMutation({
  *   variables: {
+ *      email: // value for 'email'
  *      username: // value for 'username'
  *      password: // value for 'password'
  *   },
