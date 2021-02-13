@@ -17,15 +17,30 @@ import { FieldError } from '../models/error.model';
 import {
 	validatePasswordMatch,
 	validatePasswordStrength,
-	validateUserDoesNotExist,
-	validateUsernameNotEmpty,
+	validateNewUsername,
+	validateNewEmail,
 } from '../validators/user.validators';
 
 /**
  * Input structure for methods that require a username and password
  */
 @InputType()
-class UsernamePasswordInput implements Partial<User> {
+class LoginInput {
+	/**
+	 * Either the username or email address
+	 */
+	@Field()
+	credential: string;
+
+	@Field()
+	password: string;
+}
+
+@InputType()
+class RegisterInput implements Partial<User> {
+	@Field()
+	email: string;
+
 	@Field()
 	username: string;
 
@@ -83,15 +98,15 @@ export class UserResolver {
 	 */
 	@Mutation(() => UserResponse)
 	async login(
-		@Arg('options') options: UsernamePasswordInput,
+		@Arg('options') options: LoginInput,
 		@Ctx() { prisma, req }: Context,
 	): Promise<UserResponse> {
 		// Pulls the username and password off of the options
-		const { username, password } = options;
+		const { credential, password } = options;
 
 		// Attempts to find a user with the passed in username
-		const user = await prisma.user.findUnique({
-			where: { username },
+		const user = await prisma.user.findFirst({
+			where: { OR: [{ username: credential }, { email: credential }] },
 		});
 
 		// Sends an error if the username wasn't found
@@ -99,8 +114,9 @@ export class UserResolver {
 			return {
 				errors: [
 					{
-						field: 'username',
-						message: `Could not find a user with the username ${username}`,
+						field: 'credential',
+						message:
+							'Could not find a user with the provided credential',
 					},
 				],
 			};
@@ -151,20 +167,21 @@ export class UserResolver {
 	 */
 	@Mutation(() => UserResponse)
 	async register(
-		@Arg('options') options: UsernamePasswordInput,
+		@Arg('options') options: RegisterInput,
 		@Ctx() { prisma, req }: Context,
 	): Promise<UserResponse> {
 		// Pulls the username and password off of the options
-		let { username, password } = options;
+		let { email, username, password } = options;
 
-		// Trim the username and password
+		// Trim the credentials
+		email = email.trim();
 		username = username.trim();
 		password = password.trim();
 
 		// Used to keep track of any errors that occur
 		const errors = [
-			...validateUsernameNotEmpty(username),
-			...(await validateUserDoesNotExist(username, prisma)),
+			...(await validateNewEmail(email, prisma)),
+			...(await validateNewUsername(username, prisma)),
 			...validatePasswordStrength(password),
 		];
 
@@ -178,7 +195,7 @@ export class UserResolver {
 
 		// Attempts to write the user to the db
 		const user = await prisma.user.create({
-			data: { username, password: hashedPassword },
+			data: { email, username, password: hashedPassword },
 		});
 
 		// Puts the user id on a session cookie
