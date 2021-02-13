@@ -25,7 +25,7 @@ import {
  * Input structure for methods that require a username and password
  */
 @InputType()
-class LoginInput implements Partial<User> {
+class LoginInput {
 	/**
 	 * Either the username or email address
 	 */
