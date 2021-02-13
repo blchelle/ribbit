@@ -31,6 +31,31 @@ export const validateNewEmail = async (
 	return validateEmailNotTaken(email, prisma, errors);
 };
 
+/**
+ * Checks to see if there is an account associated with an email address
+ * @param email The email address to find
+ * @param prisma The prisma client
+ * @param errors Any preexisting errors
+ */
+export const validateEmailExists = async (
+	email: string,
+	prisma: PrismaClient,
+	errors: FieldError[] = [],
+): Promise<FieldError[]> => {
+	// Checks that there is an account with the provided email
+	const emailExists =
+		(await prisma.user.findUnique({ where: { email } })) !== null;
+
+	if (!emailExists) {
+		errors.push({
+			field: 'email',
+			message: `The email ${email} is not associated with an account`,
+		});
+	}
+
+	return errors;
+};
+
 export const validateNewUsername = async (
 	username: string,
 	prisma: PrismaClient,
@@ -74,6 +99,30 @@ export const validatePasswordStrength = (
 };
 
 /**
+ * Checks that a given password and confirm password match
+ * @param password The password to check for a match
+ * @param confirmPassword The matching password
+ * @param errors Any preexisting errors
+ *
+ * @returns Errors after the validation
+ */
+export const validateNewPasswordsMatch = (
+	password: string,
+	confirmPassword: string,
+	errors: FieldError[] = [],
+): FieldError[] => {
+	// Validates that the passwords match
+	if (password !== confirmPassword) {
+		errors.push({
+			field: 'newPasswordConfirm',
+			message: 'The entered passwords do not match',
+		});
+	}
+
+	return errors;
+};
+
+/**
  * Compares a hashed and a plain password to see if they match
  * this is typically run on a sign up request
  * @param hashed The hashed password
@@ -83,7 +132,7 @@ export const validatePasswordStrength = (
  *
  * @returns Errors after the validation
  */
-export const validatePasswordMatch = async (
+export const validateCorrectPassword = async (
 	hashed: string,
 	plain: string,
 	errors: FieldError[] = [],
