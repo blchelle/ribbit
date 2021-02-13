@@ -9,17 +9,25 @@ import {
 	Resolver,
 } from 'type-graphql';
 import argon2 from 'argon2';
+import { v4 } from 'uuid';
 
-import { __COOKIE_NAME__, __PROD__ } from '../constants';
-import { Context } from '../index';
+import {
+	__COOKIE_NAME__,
+	__PROD__,
+	__FORGET_PASSWORD_PREFIX__,
+} from '../constants';
+import { Context } from '../types/Context';
 import { User } from '../models/user.model';
 import { FieldError } from '../models/error.model';
 import {
-	validatePasswordMatch,
+	validateCorrectPassword,
 	validatePasswordStrength,
 	validateNewUsername,
 	validateNewEmail,
+	validateEmailExists,
+	validateNewPasswordsMatch,
 } from '../validators/user.validators';
+import { sendResetPasswordEmail } from '../util/sendEmail';
 
 /**
  * Input structure for methods that require a username and password
@@ -123,7 +131,7 @@ export class UserResolver {
 		}
 
 		// Checks that the password matches
-		const errors = await validatePasswordMatch(user.password, password);
+		const errors = await validateCorrectPassword(user.password, password);
 
 		if (errors.length > 0) {
 			return { errors };
@@ -144,7 +152,7 @@ export class UserResolver {
 	 * @returns True if the session was successfully deleted, false otherwise
 	 */
 	@Mutation(() => Boolean)
-	logout(@Ctx() { req, res }: Context): Promise<Boolean> {
+	async logout(@Ctx() { req, res }: Context): Promise<Boolean> {
 		return new Promise((resolve) =>
 			// Attempts to destroy the session on the redis server
 			req.session.destroy((err) => {
@@ -202,5 +210,98 @@ export class UserResolver {
 		req.session.userId = user.id;
 
 		return { user };
+	}
+
+	@Mutation(() => UserResponse)
+	async forgotPassword(
+		@Arg('email') email: string,
+		@Ctx() { prisma, redis }: Context,
+	) {
+		// Checks to see that the email exists
+		const errors = await validateEmailExists(email, prisma);
+
+		if (errors.length > 0) {
+			return { errors };
+		}
+
+		const token = v4();
+
+		// Creates a token in the redis store that expires in 15 minutes
+		await redis.set(
+			`${__FORGET_PASSWORD_PREFIX__}${token}`,
+			email,
+			'ex',
+			1000 * 60 * 15, // 15 Minutes
+		);
+
+		const resetPasswordHTML = `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`;
+		await sendResetPasswordEmail(email, resetPasswordHTML);
+
+		return [];
+	}
+
+	@Mutation(() => UserResponse)
+	async resetPassword(
+		@Arg('newPassword') newPassword: string,
+		@Arg('newPasswordConfirm') newPasswordConfirm: string,
+		@Arg('token') token: string,
+		@Ctx() { prisma, redis }: Context,
+	): Promise<UserResponse> {
+		newPassword = newPassword.trim();
+		newPasswordConfirm = newPasswordConfirm.trim();
+
+		const errors = [
+			...validateNewPasswordsMatch(newPassword, newPasswordConfirm),
+			...validatePasswordStrength(newPassword),
+		];
+
+		if (errors.length > 0) {
+			return { errors };
+		}
+
+		// Gets the redis entry for the given token, which should be a user id
+		// We send back a pretty generic error message if they gave us an invalid token
+		// This is by design as we don't want to give too much information
+		const userEmail = await redis.get(
+			`${__FORGET_PASSWORD_PREFIX__}${token}`,
+		);
+		if (!userEmail) {
+			return {
+				errors: [
+					{
+						field: 'token',
+						message: 'Token expired',
+					},
+				],
+			};
+		}
+
+		// Hashes the new password
+		const hashedPassword = await argon2.hash(newPassword);
+
+		// Finds the user with the user id and updates their password
+		try {
+			const user = await prisma.user.update({
+				where: { email: userEmail },
+				data: { password: hashedPassword },
+			});
+
+			return { user };
+		} catch (err) {
+			// The error condition should only happen in exceptional circumstances
+			// In order to error, the user would have to
+			// 1. Send a forget password request, creating a token in the redis store
+			// 2. Delete their account
+			// 3. Go to the link in the email and attempt to reset their password before
+			//    the token expires
+			return {
+				errors: [
+					{
+						field: 'token',
+						message: 'This account does not exist anymore',
+					},
+				],
+			};
+		}
 	}
 }

@@ -1,30 +1,25 @@
 // This must be the first import for TypeGraphQL to work
 import 'reflect-metadata';
 
-import express, { Request, Response } from 'express';
+import express from 'express';
 import session from 'express-session';
 import morgan from 'morgan';
 import cors from 'cors';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
-import redis from 'redis';
+import Redis from 'ioredis';
 import connectRedis from 'connect-redis';
 import { PrismaClient } from '@prisma/client';
 
 import { PostResolver } from './resolvers/post.resolver';
 import { UserResolver } from './resolvers/user.resolver';
+import { Context } from './types/Context';
 import {
 	__COOKIE_NAME__,
 	__PORT__,
 	__PROD__,
 	__REDIS_SECRET__,
 } from './constants';
-
-export interface Context {
-	prisma: PrismaClient;
-	req: Request;
-	res: Response;
-}
 
 const prisma = new PrismaClient({
 	log: __PROD__ ? [] : ['query', 'error', 'info', 'warn'],
@@ -50,14 +45,14 @@ const main = async () => {
 		}
 
 		const RedisStore = connectRedis(session);
-		const redisClient = redis.createClient();
+		const redis = new Redis();
 
 		// Applies redis store - session middleware
 		app.use(
 			session({
 				name: __COOKIE_NAME__,
 				store: new RedisStore({
-					client: redisClient,
+					client: redis,
 					disableTouch: true,
 				}),
 				cookie: {
@@ -78,7 +73,12 @@ const main = async () => {
 				resolvers: [UserResolver, PostResolver],
 				validate: false,
 			}),
-			context: ({ req, res }): Context => ({ prisma, req, res }),
+			context: ({ req, res }): Context => ({
+				prisma,
+				redis: redis,
+				req,
+				res,
+			}),
 			playground: !__PROD__,
 		});
 

@@ -57,6 +57,16 @@ const Login: React.FC<LoginProps> = ({ setType }) => {
 							>
 								Login
 							</Button>
+							<Flex justify="flex-end" mt={4}>
+								<Button
+									fontSize="small"
+									variant="link"
+									colorScheme="secondary"
+									onClick={() => setType('forgot password')}
+								>
+									FORGOT PASSWORD?
+								</Button>
+							</Flex>
 						</Form>
 					</Box>
 				)}

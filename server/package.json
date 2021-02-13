@@ -26,19 +26,23 @@
 		"graphql": "^15.5.0",
 		"graphql-fields": "^2.0.3",
 		"graphql-type-json": "^0.3.2",
+		"ioredis": "^4.17.3",
 		"morgan": "^1.10.0",
-		"redis": "^3.0.2",
+		"nodemailer": "^6.4.18",
 		"reflect-metadata": "^0.1.13",
-		"type-graphql": "^1.1.1"
+		"type-graphql": "^1.1.1",
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"@prisma/cli": "~2.15.0",
 		"@types/connect-redis": "^0.0.16",
 		"@types/cors": "^2.8.9",
 		"@types/express": "^4.17.11",
+		"@types/ioredis": "^4.19.4",
 		"@types/morgan": "^1.9.2",
 		"@types/node": "^14.14.22",
-		"@types/redis": "^2.8.28",
+		"@types/nodemailer": "^6.4.0",
+		"@types/uuid": "^8.3.0",
 		"nodemon": "^2.0.7",
 		"typescript": "^4.1.3"
 	}
