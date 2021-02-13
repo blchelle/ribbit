@@ -8,7 +8,6 @@ import { toErrorMap } from '../utils/toErrorMap';
 import { AuthModalType } from './AuthModal';
 
 interface LoginProps {
-	onClose: () => void;
 	setType: React.Dispatch<React.SetStateAction<AuthModalType>>;
 }
 
