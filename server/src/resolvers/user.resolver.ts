@@ -2,7 +2,6 @@ import {
 	Arg,
 	Ctx,
 	Field,
-	InputType,
 	Mutation,
 	ObjectType,
 	Query,
@@ -28,33 +27,6 @@ import {
 	validateNewPasswordsMatch,
 } from '../validators/user.validators';
 import { sendResetPasswordEmail } from '../util/sendEmail';
-
-/**
- * Input structure for methods that require a username and password
- */
-@InputType()
-class LoginInput {
-	/**
-	 * Either the username or email address
-	 */
-	@Field()
-	credential: string;
-
-	@Field()
-	password: string;
-}
-
-@InputType()
-class RegisterInput implements Partial<User> {
-	@Field()
-	email: string;
-
-	@Field()
-	username: string;
-
-	@Field()
-	password: string;
-}
 
 /**
  * Response structure for user queries and mutations
@@ -106,12 +78,10 @@ export class UserResolver {
 	 */
 	@Mutation(() => UserResponse)
 	async login(
-		@Arg('options') options: LoginInput,
+		@Arg('credential') credential: string,
+		@Arg('password') password: string,
 		@Ctx() { prisma, req }: Context,
 	): Promise<UserResponse> {
-		// Pulls the username and password off of the options
-		const { credential, password } = options;
-
 		// Attempts to find a user with the passed in username
 		const user = await prisma.user.findFirst({
 			where: { OR: [{ username: credential }, { email: credential }] },
@@ -175,12 +145,11 @@ export class UserResolver {
 	 */
 	@Mutation(() => UserResponse)
 	async register(
-		@Arg('options') options: RegisterInput,
+		@Arg('email') email: string,
+		@Arg('username') username: string,
+		@Arg('password') password: string,
 		@Ctx() { prisma, req }: Context,
 	): Promise<UserResponse> {
-		// Pulls the username and password off of the options
-		let { email, username, password } = options;
-
 		// Trim the credentials
 		email = email.trim();
 		username = username.trim();
@@ -212,6 +181,11 @@ export class UserResolver {
 		return { user };
 	}
 
+	/**
+	 * Attempts to send a forgot password email to the sent email address
+	 * @param email The email to send the link to
+	 * @param context The prisma client and redis client
+	 */
 	@Mutation(() => UserResponse)
 	async forgotPassword(
 		@Arg('email') email: string,
@@ -240,6 +214,19 @@ export class UserResolver {
 		return [];
 	}
 
+	/**
+	 * Attempts to change the password to the account associated with the
+	 * forgot password token. This could fail for several reasons.
+	 * 1. The passwords don't match
+	 * 2. The password is not strong enough
+	 * 3. The token is expired
+	 * 4. The token is invalid
+	 * 5. The account linked with the token no longer exists
+	 * @param newPassword The users new password
+	 * @param newPasswordConfirm A copy of the users new password for validation
+	 * @param token The token accompanying the reset request
+	 * @param context The prisma and redis clients
+	 */
 	@Mutation(() => UserResponse)
 	async resetPassword(
 		@Arg('newPassword') newPassword: string,
