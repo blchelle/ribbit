@@ -1,7 +1,5 @@
 mutation Register($email: String!, $username: String!, $password: String!) {
-	register(
-		options: { email: $email, username: $username, password: $password }
-	) {
+	register(email: $email, username: $username, password: $password) {
 		user {
 			...CommonUser
 		}

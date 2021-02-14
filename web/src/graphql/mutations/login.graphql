@@ -1,5 +1,5 @@
 mutation Login($credential: String!, $password: String!) {
-	login(options: { credential: $credential, password: $password }) {
+	login(credential: $credential, password: $password) {
 		user {
 			...CommonUser
 		}

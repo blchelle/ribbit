@@ -78,12 +78,15 @@ export type MutationDeletePostArgs = {
 
 
 export type MutationLoginArgs = {
-  options: LoginInput;
+  password: Scalars['String'];
+  credential: Scalars['String'];
 };
 
 
 export type MutationRegisterArgs = {
-  options: RegisterInput;
+  password: Scalars['String'];
+  username: Scalars['String'];
+  email: Scalars['String'];
 };
 
 
@@ -108,17 +111,6 @@ export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
   message: Scalars['String'];
-};
-
-export type LoginInput = {
-  credential: Scalars['String'];
-  password: Scalars['String'];
-};
-
-export type RegisterInput = {
-  email: Scalars['String'];
-  username: Scalars['String'];
-  password: Scalars['String'];
 };
 
 export type CommonErrorFragment = (
@@ -288,7 +280,7 @@ export type ForgotPasswordMutationResult = Apollo.MutationResult<ForgotPasswordM
 export type ForgotPasswordMutationOptions = Apollo.BaseMutationOptions<ForgotPasswordMutation, ForgotPasswordMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($credential: String!, $password: String!) {
-  login(options: {credential: $credential, password: $password}) {
+  login(credential: $credential, password: $password) {
     user {
       ...CommonUser
     }
@@ -356,7 +348,7 @@ export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const RegisterDocument = gql`
     mutation Register($email: String!, $username: String!, $password: String!) {
-  register(options: {email: $email, username: $username, password: $password}) {
+  register(email: $email, username: $username, password: $password) {
     user {
       ...CommonUser
     }
