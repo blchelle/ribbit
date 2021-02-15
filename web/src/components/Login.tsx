@@ -3,15 +3,16 @@ import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 
 import InputField from './InputField';
-import { useLoginMutation } from '../generated/graphql';
+import { MeDocument, MeQuery, useLoginMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils/toErrorMap';
 import { AuthModalType } from './AuthModal';
 
 interface LoginProps {
 	setType: React.Dispatch<React.SetStateAction<AuthModalType>>;
+	onSuccess: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ setType }) => {
+const Login: React.FC<LoginProps> = ({ setType, onSuccess }) => {
 	// GraphQL Hooks for Login Mutation
 	const [login] = useLoginMutation();
 
@@ -23,12 +24,23 @@ const Login: React.FC<LoginProps> = ({ setType }) => {
 			<Formik
 				initialValues={{ credential: '', password: '' }}
 				onSubmit={async (values, { setErrors }) => {
-					const res = await login({ variables: values });
+					const res = await login({
+						variables: values,
+						update: (cache, { data }) => {
+							cache.writeQuery<MeQuery>({
+								query: MeDocument,
+								data: {
+									__typename: 'Query',
+									me: data?.login.user,
+								},
+							});
+						},
+					});
 
 					if (res.data?.login.errors) {
 						setErrors(toErrorMap(res.data.login.errors));
 					} else if (res.data?.login.user) {
-						window.location.reload();
+						onSuccess();
 					}
 				}}
 			>

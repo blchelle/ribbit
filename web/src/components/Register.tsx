@@ -4,27 +4,39 @@ import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import rug from 'random-username-generator';
 
 import InputField from './InputField';
-import { useRegisterMutation } from '../generated/graphql';
+import { MeDocument, MeQuery, useRegisterMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils/toErrorMap';
 import UsernameGenerator from './UsernameGenerator';
 import { AuthModalType } from './AuthModal';
 
 interface RegisterProps {
 	setType: React.Dispatch<React.SetStateAction<AuthModalType>>;
+	onSuccess: () => void;
+	numUsernameSuggestions?: number;
 }
 
-const Register: React.FC<RegisterProps> = ({ setType }) => {
+const Register: React.FC<RegisterProps> = ({
+	setType,
+	onSuccess,
+	numUsernameSuggestions = 5,
+}) => {
 	// GraphQL Hook for Register Mutation
 	const [register] = useRegisterMutation();
 
 	// Generates a set of random usernames
 	const [usernames, setUsernames] = useState(
-		new Array(5).fill('').map(() => rug.generate()),
+		new Array(numUsernameSuggestions)
+			.fill('')
+			.map(() => (rug.generate() as string)?.toLowerCase()),
 	);
 
 	// Reloads the random usernames
 	const reloadUsernames = () => {
-		setUsernames(new Array(5).fill('').map(() => rug.generate()));
+		setUsernames(
+			new Array(numUsernameSuggestions)
+				.fill('')
+				.map(() => (rug.generate() as string)?.toLowerCase()),
+		);
 	};
 
 	return (
@@ -33,14 +45,25 @@ const Register: React.FC<RegisterProps> = ({ setType }) => {
 				Sign Up
 			</Heading>
 			<Formik
-				initialValues={{ username: '', password: '' }}
+				initialValues={{ email: '', username: '', password: '' }}
 				onSubmit={async (values, { setErrors }) => {
-					const res = await register({ variables: values });
+					const res = await register({
+						variables: values,
+						update: (cache, { data }) => {
+							cache.writeQuery<MeQuery>({
+								query: MeDocument,
+								data: {
+									__typename: 'Query',
+									me: data?.register.user,
+								},
+							});
+						},
+					});
 
 					if (res.data?.register.errors) {
 						setErrors(toErrorMap(res.data.register.errors));
 					} else if (res.data?.register.user) {
-						window.location.reload();
+						onSuccess();
 					}
 				}}
 			>

@@ -22,8 +22,10 @@ interface AuthModalProps extends ModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ type, setType, ...props }) => {
 	let form = null;
-	if (type === 'login') form = <Login setType={setType} />;
-	else if (type === 'sign up') form = <Register setType={setType} />;
+	if (type === 'login')
+		form = <Login setType={setType} onSuccess={props.onClose} />;
+	else if (type === 'sign up')
+		form = <Register setType={setType} onSuccess={props.onClose} />;
 	else if (type === 'forgot password')
 		form = <ForgotPassword setType={setType} />;
 
