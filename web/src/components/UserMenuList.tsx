@@ -30,8 +30,6 @@ const UserMenuList: React.FC<UserMenuListProps> = ({ openAuthModal, user }) => {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const isDarkMode = colorMode === 'dark';
 
-	console.log(user);
-
 	// The logout mutation has to update the cached user to null
 	const [logout] = useLogoutMutation({
 		update(cache) {
@@ -74,7 +72,6 @@ const UserMenuList: React.FC<UserMenuListProps> = ({ openAuthModal, user }) => {
 						icon={<LogoutIcon size="24px" />}
 						onClick={() => {
 							logout();
-							window.location.reload();
 						}}
 					>
 						<Text>Log Out</Text>
