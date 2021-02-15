@@ -249,9 +249,8 @@ export class UserResolver {
 		// Gets the redis entry for the given token, which should be a user id
 		// We send back a pretty generic error message if they gave us an invalid token
 		// This is by design as we don't want to give too much information
-		const userEmail = await redis.get(
-			`${__FORGET_PASSWORD_PREFIX__}${token}`,
-		);
+		const key = `${__FORGET_PASSWORD_PREFIX__}${token}`;
+		const userEmail = await redis.get(key);
 		if (!userEmail) {
 			return {
 				errors: [
@@ -272,6 +271,9 @@ export class UserResolver {
 				where: { email: userEmail },
 				data: { password: hashedPassword },
 			});
+
+			// The update was successful, delete the token from redis
+			await redis.del(key);
 
 			return { user };
 		} catch (err) {
