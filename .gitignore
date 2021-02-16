@@ -45,5 +45,6 @@ yarn-error.log*
 # vercel
 .vercel
 
-# Prisma Migrations
-migrations
+# Prisma
+dbml/
+migrations/
