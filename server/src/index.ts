@@ -11,7 +11,7 @@ import Redis from 'ioredis';
 import connectRedis from 'connect-redis';
 import { PrismaClient } from '@prisma/client';
 
-import { PostResolver } from './resolvers/post.resolver';
+// import { PostResolver } from './resolvers/post.resolver';
 import { UserResolver } from './resolvers/user.resolver';
 import { Context } from './types/Context';
 import {
@@ -70,7 +70,7 @@ const main = async () => {
 		// Sets up apollo server middleware
 		const apolloServer = new ApolloServer({
 			schema: await buildSchema({
-				resolvers: [UserResolver, PostResolver],
+				resolvers: [UserResolver],
 				validate: false,
 			}),
 			context: ({ req, res }): Context => ({

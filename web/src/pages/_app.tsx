@@ -1,4 +1,4 @@
-import { ChakraProvider, ColorModeProvider } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import ThemeWrapper from '../components/AppWrapper';
 import { __NEXT_PUBLIC_API_URL__ } from '../constants';
 
